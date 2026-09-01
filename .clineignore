@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+/build/
+/dist/
+/.wxt/
+/.output/
+
+# Version control
+.git/
+
+# Environment/secrets
+.env
+.env.*
+
+# Large/generated files
+*.min.js
+*.map
+bun.lock
