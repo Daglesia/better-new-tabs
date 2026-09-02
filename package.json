@@ -15,6 +15,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@daglesia/daglesias-library-of-components": "link:@daglesia/daglesias-library-of-components",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
