@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { fetchOpenIssues } from '@/utils/fetchIssues';
-import { formatIssues, groupIssuesByRepo, type RepoGroup } from '@/utils/formatIssues';
+import { formatIssues } from '@/utils/formatIssues';
 import '@daglesia/daglesias-library-of-components/scss';
 
 type Status = 'loading' | 'ready' | 'error';
 
 export default function IssuesList() {
-  const [groups, setGroups] = useState<RepoGroup[]>([]);
+  const [groups, setGroups] = useState<FormattedIssue[]>([]);
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +16,7 @@ export default function IssuesList() {
     fetchOpenIssues()
       .then((issues) => {
         if (cancelled) return;
-        setGroups(groupIssuesByRepo(formatIssues(issues)));
+        setGroups(formatIssues(issues).slice(0,4));
         setStatus('ready');
       })
       .catch((err: unknown) => {
@@ -43,12 +43,9 @@ export default function IssuesList() {
   }
 
   return (
-    <div className="issues-list">
-      {groups.map((group) => (
-        <div className="issues-list__repo" key={group.repoFullName}>
-          <h3 className="issues-list__repo-name">{group.repoName}</h3>
+        <div className="widget">
           <ul className="issues-list__items">
-            {group.issues.map((issue) => (
+            {groups.map((issue) => (
               <li key={issue.id}>
                 <a
                   className="dlc-list-item"
@@ -59,7 +56,7 @@ export default function IssuesList() {
                   <div className="dlc-list-item__content">
                     <span className="dlc-list-item__content__title">{issue.title}</span>
                     <span className="dlc-list-item__content__subtitle">
-                      {issue.author} · {issue.relativeTime}
+                      {issue.repoName}
                     </span>
                   </div>
                 </a>
@@ -67,7 +64,5 @@ export default function IssuesList() {
             ))}
           </ul>
         </div>
-      ))}
-    </div>
   );
 }
