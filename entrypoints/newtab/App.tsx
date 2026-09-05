@@ -3,14 +3,21 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import './App.css';
 import IssuesList from './IssuesList';
+import HealthCheck from './HealthCheck';
 import { Responsive, useContainerWidth } from "react-grid-layout";
 
 function ResponsiveGrid() {
   const { width, containerRef, mounted } = useContainerWidth();
 
   const layouts = {
-    lg: [{ i: "1", x: 0, y: 0, w: 2, h: 2 }],
-    md: [{ i: "1", x: 0, y: 0, w: 2, h: 2 }]
+    lg: [
+      { i: "1", x: 0, y: 0, w: 2, h: 2 },
+      { i: "2", x: 2, y: 0, w: 2, h: 2 },
+    ],
+    md: [
+      { i: "1", x: 0, y: 0, w: 2, h: 2 },
+      { i: "2", x: 2, y: 0, w: 2, h: 2 },
+    ]
   };
 
   return (
@@ -25,8 +32,9 @@ function ResponsiveGrid() {
           <div key="1">
             <IssuesList key="1"/>
           </div>
-          <div key="2">2</div>
-          <div key="3">3</div>
+          <div key="2">
+            <HealthCheck key="2"/>
+          </div>
         </Responsive>
       )}
     </div>
