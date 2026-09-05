@@ -25,9 +25,14 @@ body,
   height: fit-content;
 }
 
+.issues-list__items {
+  height: 100%;
+  overflow: hidden;
+}
+
 .widget {
   padding: 16px;
-  border: 2px solid red;
+  border: 2px solid #333333;
   border-radius: 16px;
   height: calc(100% - 32px);
 }
