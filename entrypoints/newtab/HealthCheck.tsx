@@ -64,7 +64,7 @@ export default function HealthCheck() {
 
   return (
     <div className="widget health-check">
-      <div className="health-check__header">
+      <div className="widget__header">
         <span>Service Health</span>
         <button
           type="button"

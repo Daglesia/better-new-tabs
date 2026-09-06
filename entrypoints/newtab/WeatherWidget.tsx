@@ -71,6 +71,9 @@ export default function WeatherWidget() {
 
   return (
     <div className="widget weather-widget">
+      <div className="widget__header">
+        <span>Weather</span>
+      </div>
       <div className="weather-widget__temp">{weather.temperatureC}°C</div>
       <div className="weather-widget__rain">
         {weather.rain.willRain

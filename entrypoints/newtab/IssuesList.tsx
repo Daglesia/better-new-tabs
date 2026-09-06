@@ -92,6 +92,9 @@ export default function IssuesList() {
 
   return (
     <div className="widget" ref={containerRef}>
+      <div className="widget__header">
+        <span>To do list</span>
+      </div>
       <ul className="issues-list__items" ref={listRef}>
         {issues.slice(0, visibleCount).map((issue) => (
           <li key={issue.id}>

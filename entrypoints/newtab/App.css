@@ -37,11 +37,7 @@ body,
   height: calc(100% - 32px);
 }
 
-.health-check {
-  width: 320px;
-}
-
-.health-check__header {
+.widget__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
