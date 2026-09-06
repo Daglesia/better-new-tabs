@@ -4,6 +4,7 @@ import 'react-resizable/css/styles.css';
 import './App.css';
 import IssuesList from './IssuesList';
 import HealthCheck from './HealthCheck';
+import WeatherWidget from './WeatherWidget';
 import { Responsive, useContainerWidth } from "react-grid-layout";
 
 function ResponsiveGrid() {
@@ -34,6 +35,9 @@ function ResponsiveGrid() {
           </div>
           <div key="2">
             <HealthCheck key="2"/>
+          </div>
+          <div key="3">
+            <WeatherWidget key="2"/>
           </div>
         </Responsive>
       )}
