@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useMode } from './ModeContext';
 
 interface ServiceConfig {
   name: string;
@@ -7,7 +8,6 @@ interface ServiceConfig {
   checkUrl?: string;
 }
 
-// Edit this list to add/remove the services you want monitored.
 const SERVICES: ServiceConfig[] = [
   { name: 'Gitea', url: 'https://git.daglesia.com' },
   { name: 'Google', url: 'https://www.google.com' },
@@ -22,9 +22,6 @@ async function checkService(url: string): Promise<ServiceState> {
   const timeout = setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS);
 
   try {
-    // no-cors means we can't read the response body/status for cross-origin
-    // requests, but a resolved fetch (even an opaque response) tells us the
-    // request reached the server, which is enough for a basic "is it up" check.
     await fetch(url, {
       method: 'HEAD',
       mode: 'no-cors',
@@ -39,27 +36,76 @@ async function checkService(url: string): Promise<ServiceState> {
   }
 }
 
+function deriveName(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
 export default function HealthCheck() {
+  const { mode } = useMode();
+  const isEditMode = mode === 'edit';
+
+  const [customServices, setCustomServices] = useState<ServiceConfig[]>([]);
+  const [newUrl, setNewUrl] = useState('');
+  const [addError, setAddError] = useState<string | null>(null);
+
+  const services = useMemo(() => [...SERVICES, ...customServices], [customServices]);
+
   const [statuses, setStatuses] = useState<Record<string, ServiceState>>(
-    () => Object.fromEntries(SERVICES.map((s) => [s.name, 'checking'])),
+    () => Object.fromEntries(services.map((s) => [s.name, 'checking'])),
   );
 
   const runChecks = useCallback(() => {
-    setStatuses(Object.fromEntries(SERVICES.map((s) => [s.name, 'checking'])));
+    setStatuses(Object.fromEntries(services.map((s) => [s.name, 'checking'])));
 
-    SERVICES.forEach((service) => {
+    services.forEach((service) => {
       checkService(service.checkUrl ?? service.url).then((result) => {
         setStatuses((prev) => ({ ...prev, [service.name]: result }));
       });
     });
-  }, []);
+  }, [services]);
 
   useEffect(() => {
     runChecks();
-  }, [runChecks]);
+    // Re-run whenever the set of monitored services changes (e.g. one is added).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.length]);
 
   const handleClick = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleAddService = (event: FormEvent) => {
+    event.preventDefault();
+    const trimmed = newUrl.trim();
+    if (!trimmed) {
+      setAddError('Enter a URL');
+      return;
+    }
+
+    const normalizedUrl = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+    let name: string;
+    try {
+      // eslint-disable-next-line no-new
+      new URL(normalizedUrl); // validate
+      name = deriveName(normalizedUrl);
+    } catch {
+      setAddError('Enter a valid URL');
+      return;
+    }
+
+    if (services.some((s) => s.url === normalizedUrl)) {
+      setAddError('That URL is already being monitored');
+      return;
+    }
+
+    setCustomServices((prev) => [...prev, { name, url: normalizedUrl }]);
+    setNewUrl('');
+    setAddError(null);
   };
 
   return (
@@ -76,7 +122,7 @@ export default function HealthCheck() {
         </button>
       </div>
       <ul className="health-check__items">
-        {SERVICES.map((service) => {
+        {services.map((service) => {
           const state = statuses[service.name] ?? 'checking';
           return (
             <li key={service.name}>
@@ -97,6 +143,24 @@ export default function HealthCheck() {
           );
         })}
       </ul>
+      {isEditMode && (
+        <form className="health-check__add-form" onSubmit={handleAddService}>
+          <input
+            type="text"
+            className="health-check__add-input"
+            placeholder="Add URL to monitor…"
+            value={newUrl}
+            onChange={(e) => {
+              setNewUrl(e.target.value);
+              setAddError(null);
+            }}
+          />
+          <button type="submit" className="health-check__add-button">
+            + Add
+          </button>
+          {addError && <span className="health-check__add-error">{addError}</span>}
+        </form>
+      )}
     </div>
   );
 }
