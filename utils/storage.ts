@@ -10,24 +10,21 @@ export interface ServiceConfig {
   checkUrl?: string;
 }
 
-export const DEFAULT_LAYOUTS: ResponsiveLayouts = {
-  lg: [
-    { i: '1', x: 0, y: 0, w: 2, h: 2 },
-    { i: '2', x: 2, y: 0, w: 2, h: 2 },
-    { i: '3', x: 4, y: 0, w: 2, h: 2 },
-  ],
-  md: [
-    { i: '1', x: 0, y: 0, w: 2, h: 2 },
-    { i: '2', x: 2, y: 0, w: 2, h: 2 },
-    { i: '3', x: 4, y: 0, w: 2, h: 2 },
-  ],
-};
-
+// Dashboard starts empty: no layouts, no widgets.
 export const layoutsItem = storage.defineItem<ResponsiveLayouts>('local:layouts', {
-  fallback: DEFAULT_LAYOUTS,
+  fallback: {},
+});
+
+// Ids of the widgets the user has added (see widgets.tsx)
+export const activeWidgetsItem = storage.defineItem<string[]>('local:activeWidgets', {
+  fallback: [],
 });
 
 export const customServicesItem = storage.defineItem<ServiceConfig[]>(
   'local:customServices',
   { fallback: [] },
 );
+
+export const notepadItem = storage.defineItem<string>('local:notepad', {
+  fallback: '',
+});
