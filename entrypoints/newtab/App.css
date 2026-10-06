@@ -26,11 +26,14 @@ body,
 }
 
 .issues-list__items {
-  height: 100%;
   overflow: hidden;
+  flex: 1;
+  margin-bottom: 24px;
 }
 
 .widget {
+  display: flex;
+  flex-direction: column;
   padding: 16px;
   border: 2px solid #333333;
   border-radius: 16px;
@@ -183,5 +186,95 @@ body,
 .health-check__add-error {
   width: 100%;
   color: #f44336;
+  font-size: 0.85em;
+}
+
+.cof {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.cof__svg {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.cof__segment {
+  cursor: pointer;
+}
+
+.cof__wedge {
+  stroke: #1a1a1a;
+  stroke-width: 2;
+  transition: filter 0.15s;
+}
+
+.cof__segment:hover .cof__wedge {
+  filter: brightness(1.15);
+}
+
+.cof__wedge--selected {
+  stroke: #ffffff;
+  stroke-width: 4;
+}
+
+.cof__wedge--relative {
+  stroke: #ffffff;
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
+.cof__label {
+  fill: #1a1a1a;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.cof__center {
+  fill: #1a1a1a;
+}
+
+.cof__center-title {
+  fill: #ffffff;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.cof__center-subtitle {
+  fill: #888888;
+  font-size: 14px;
+}
+
+.cof__chords {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cof__chord {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #202020;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  padding: 4px 2px;
+}
+
+.cof__chord-numeral {
+  font-size: 0.75em;
+  color: #888888;
+}
+
+.cof__chord-name {
+  font-weight: 600;
+}
+
+.cof__enharmonic {
+  align-self: center;
+  padding: 4px 10px;
   font-size: 0.85em;
 }

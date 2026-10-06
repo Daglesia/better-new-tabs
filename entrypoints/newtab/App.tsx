@@ -12,14 +12,20 @@ import { ModeProvider, useMode } from './ModeContext';
 type Breakpoint = 'lg' | 'md' | 'sm' | 'xs' | 'xxs';
 type ResponsiveLayouts = Partial<Record<Breakpoint, Layout>>;
 
+import CircleOfFifths from './CircleOfFifths';
+
 const DEFAULT_LAYOUTS: ResponsiveLayouts = {
   lg: [
     { i: "1", x: 0, y: 0, w: 2, h: 2 },
     { i: "2", x: 2, y: 0, w: 2, h: 2 },
+    { i: "3", x: 4, y: 0, w: 2, h: 2 },
+    { i: "4", x: 6, y: 0, w: 3, h: 4 },
   ],
   md: [
     { i: "1", x: 0, y: 0, w: 2, h: 2 },
     { i: "2", x: 2, y: 0, w: 2, h: 2 },
+    { i: "3", x: 4, y: 0, w: 2, h: 2 },
+    { i: "4", x: 6, y: 0, w: 3, h: 4 },
   ],
 };
 
@@ -48,7 +54,10 @@ function ResponsiveGrid() {
             <HealthCheck key="2" />
           </div>
           <div key="3">
-            <WeatherWidget key="2" />
+            <WeatherWidget key="3" />
+          </div>
+          <div key="4">
+            <CircleOfFifths key="4" />
           </div>
         </Responsive>
       )}
