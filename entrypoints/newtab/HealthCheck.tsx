@@ -1,12 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useMode } from './ModeContext';
-
-interface ServiceConfig {
-  name: string;
-  url: string;
-  /** Optional separate URL to actually ping, if different from the link target (e.g. an API health endpoint) */
-  checkUrl?: string;
-}
+import { customServicesItem, type ServiceConfig } from '@/utils/storage';
 
 const SERVICES: ServiceConfig[] = [
   { name: 'Gitea', url: 'https://git.daglesia.com' },
@@ -49,6 +43,22 @@ export default function HealthCheck() {
   const isEditMode = mode === 'edit';
 
   const [customServices, setCustomServices] = useState<ServiceConfig[]>([]);
+
+    const prevMode = useRef(mode);
+
+  // Load saved custom services once
+  useEffect(() => {
+    customServicesItem.getValue().then(setCustomServices);
+  }, []);
+
+  // Save when leaving edit mode
+  useEffect(() => {
+    if (prevMode.current === 'edit' && mode === 'view') {
+      customServicesItem.setValue(customServices);
+    }
+    prevMode.current = mode;
+  }, [mode, customServices]);
+  
   const [newUrl, setNewUrl] = useState('');
   const [addError, setAddError] = useState<string | null>(null);
 

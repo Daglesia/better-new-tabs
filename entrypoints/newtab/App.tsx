@@ -1,43 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import './App.css';
 import IssuesList from './IssuesList';
 import HealthCheck from './HealthCheck';
 import WeatherWidget from './WeatherWidget';
-import { Responsive, useContainerWidth } from "react-grid-layout";
-import type { Layout } from 'react-grid-layout';
+import { Responsive, useContainerWidth } from 'react-grid-layout';
 import { ModeProvider, useMode } from './ModeContext';
-
-type Breakpoint = 'lg' | 'md' | 'sm' | 'xs' | 'xxs';
-type ResponsiveLayouts = Partial<Record<Breakpoint, Layout>>;
-
-import CircleOfFifths from './CircleOfFifths';
-
-const DEFAULT_LAYOUTS: ResponsiveLayouts = {
-  lg: [
-    { i: "1", x: 0, y: 0, w: 2, h: 2 },
-    { i: "2", x: 2, y: 0, w: 2, h: 2 },
-    { i: "3", x: 4, y: 0, w: 2, h: 2 },
-    { i: "4", x: 6, y: 0, w: 3, h: 4 },
-  ],
-  md: [
-    { i: "1", x: 0, y: 0, w: 2, h: 2 },
-    { i: "2", x: 2, y: 0, w: 2, h: 2 },
-    { i: "3", x: 4, y: 0, w: 2, h: 2 },
-    { i: "4", x: 6, y: 0, w: 3, h: 4 },
-  ],
-};
+import {
+  DEFAULT_LAYOUTS,
+  layoutsItem,
+  type ResponsiveLayouts,
+} from '@/utils/storage';
 
 function ResponsiveGrid() {
   const { width, containerRef, mounted } = useContainerWidth();
   const { mode } = useMode();
   const [layouts, setLayouts] = useState<ResponsiveLayouts>(DEFAULT_LAYOUTS);
+  const [loaded, setLoaded] = useState(false);
+  const prevMode = useRef(mode);
   const isEditMode = mode === 'edit';
+
+  // Load saved layouts once
+  useEffect(() => {
+    layoutsItem.getValue().then((saved) => {
+      setLayouts(saved);
+      setLoaded(true);
+    });
+  }, []);
+
+  // Save when leaving edit mode ("Done editing")
+  useEffect(() => {
+    if (prevMode.current === 'edit' && mode === 'view') {
+      layoutsItem.setValue(layouts);
+    }
+    prevMode.current = mode;
+  }, [mode, layouts]);
 
   return (
     <div ref={containerRef}>
-      {mounted && (
+      {mounted && loaded && (
         <Responsive
           layouts={layouts}
           onLayoutChange={(_layout, allLayouts) => setLayouts(allLayouts)}
@@ -47,18 +49,9 @@ function ResponsiveGrid() {
           dragConfig={{ enabled: isEditMode, cancel: 'button, a, input, form' }}
           resizeConfig={{ enabled: isEditMode }}
         >
-          <div key="1">
-            <IssuesList key="1" />
-          </div>
-          <div key="2">
-            <HealthCheck key="2" />
-          </div>
-          <div key="3">
-            <WeatherWidget key="3" />
-          </div>
-          <div key="4">
-            <CircleOfFifths key="4" />
-          </div>
+          <div key="1"><IssuesList /></div>
+          <div key="2"><HealthCheck /></div>
+          <div key="3"><WeatherWidget /></div>
         </Responsive>
       )}
     </div>
