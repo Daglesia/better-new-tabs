@@ -3,6 +3,8 @@ import IssuesList from './IssuesList';
 import HealthCheck from './HealthCheck';
 import WeatherWidget from './WeatherWidget';
 import NotepadWidget from './NotepadWidget';
+import CircleOfFifths from './CircleOfFifths';
+import BookmarksWidget from './BookmarksWidget';
 
 export interface WidgetDefinition {
   id: string;
@@ -16,6 +18,8 @@ export const WIDGETS: WidgetDefinition[] = [
   { id: 'health', label: 'Service Health', component: HealthCheck, defaultSize: { w: 2, h: 2 } },
   { id: 'weather', label: 'Weather', component: WeatherWidget, defaultSize: { w: 2, h: 2 } },
   { id: 'notepad', label: 'Notepad', component: NotepadWidget, defaultSize: { w: 2, h: 2 } },
+  { id: 'circleOfFifths', label: 'CircleOfFifths', component: CircleOfFifths, defaultSize: { w: 2, h: 2 } },
+  { id: 'bookmarks', label: 'Bookmarks', component: BookmarksWidget, defaultSize: { w: 2, h: 2 } },
 ];
 
 export const WIDGETS_BY_ID = new Map(WIDGETS.map((w) => [w.id, w]));
