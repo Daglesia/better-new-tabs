@@ -1,11 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useMode } from './ModeContext';
 import { customServicesItem, type ServiceConfig } from '@/utils/storage';
-
-const SERVICES: ServiceConfig[] = [
-  { name: 'Gitea', url: 'https://git.daglesia.com' },
-  { name: 'Google', url: 'https://www.google.com' },
-];
 
 type ServiceState = 'checking' | 'up' | 'down';
 
@@ -42,47 +37,46 @@ export default function HealthCheck() {
   const { mode } = useMode();
   const isEditMode = mode === 'edit';
 
-  const [customServices, setCustomServices] = useState<ServiceConfig[]>([]);
+  const [services, setServices] = useState<ServiceConfig[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [newUrl, setNewUrl] = useState('');
+  const [addError, setAddError] = useState<string | null>(null);
+  // Keyed by URL, so two services on the same host can't collide
+  const [statuses, setStatuses] = useState<Record<string, ServiceState>>({});
 
-    const prevMode = useRef(mode);
+  const prevMode = useRef(mode);
 
-  // Load saved custom services once
+  // Load saved services once
   useEffect(() => {
-    customServicesItem.getValue().then(setCustomServices);
+    customServicesItem.getValue().then((saved) => {
+      setServices(saved);
+      setLoaded(true);
+    });
   }, []);
 
   // Save when leaving edit mode
   useEffect(() => {
     if (prevMode.current === 'edit' && mode === 'view') {
-      customServicesItem.setValue(customServices);
+      customServicesItem.setValue(services);
     }
     prevMode.current = mode;
-  }, [mode, customServices]);
-  
-  const [newUrl, setNewUrl] = useState('');
-  const [addError, setAddError] = useState<string | null>(null);
-
-  const services = useMemo(() => [...SERVICES, ...customServices], [customServices]);
-
-  const [statuses, setStatuses] = useState<Record<string, ServiceState>>(
-    () => Object.fromEntries(services.map((s) => [s.name, 'checking'])),
-  );
+  }, [mode, services]);
 
   const runChecks = useCallback(() => {
-    setStatuses(Object.fromEntries(services.map((s) => [s.name, 'checking'])));
+    setStatuses(Object.fromEntries(services.map((s) => [s.url, 'checking' as const])));
 
     services.forEach((service) => {
       checkService(service.checkUrl ?? service.url).then((result) => {
-        setStatuses((prev) => ({ ...prev, [service.name]: result }));
+        setStatuses((prev) => ({ ...prev, [service.url]: result }));
       });
     });
   }, [services]);
 
+  // Re-run whenever the set of monitored services changes (added or removed)
   useEffect(() => {
+    if (!loaded) return;
     runChecks();
-    // Re-run whenever the set of monitored services changes (e.g. one is added).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [services.length]);
+  }, [loaded, runChecks]);
 
   const handleClick = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -98,11 +92,8 @@ export default function HealthCheck() {
 
     const normalizedUrl = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 
-    let name: string;
     try {
-      // eslint-disable-next-line no-new
       new URL(normalizedUrl); // validate
-      name = deriveName(normalizedUrl);
     } catch {
       setAddError('Enter a valid URL');
       return;
@@ -113,9 +104,13 @@ export default function HealthCheck() {
       return;
     }
 
-    setCustomServices((prev) => [...prev, { name, url: normalizedUrl }]);
+    setServices((prev) => [...prev, { name: deriveName(normalizedUrl), url: normalizedUrl }]);
     setNewUrl('');
     setAddError(null);
+  };
+
+  const handleRemoveService = (url: string) => {
+    setServices((prev) => prev.filter((s) => s.url !== url));
   };
 
   return (
@@ -131,28 +126,48 @@ export default function HealthCheck() {
           ⟳
         </button>
       </div>
-      <ul className="health-check__items">
-        {services.map((service) => {
-          const state = statuses[service.name] ?? 'checking';
-          return (
-            <li key={service.name}>
-              <button
-                type="button"
-                className="health-check__item"
-                onClick={() => handleClick(service.url)}
-              >
-                <span
-                  className={`health-check__status health-check__status--${state}`}
-                  aria-hidden="true"
+
+      {loaded && services.length === 0 ? (
+        <div className="health-check__empty">
+          {isEditMode
+            ? 'No services yet. Add a URL below.'
+            : 'No services yet. Click “Edit layout” to add one.'}
+        </div>
+      ) : (
+        <ul className="health-check__items">
+          {services.map((service) => {
+            const state = statuses[service.url] ?? 'checking';
+            return (
+              <li key={service.url} className="health-check__row">
+                <button
+                  type="button"
+                  className="health-check__item"
+                  onClick={() => handleClick(service.url)}
                 >
-                  {state === 'checking' ? '…' : state === 'up' ? '✓' : '✕'}
-                </span>
-                <span className="health-check__name">{service.name}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+                  <span
+                    className={`health-check__status health-check__status--${state}`}
+                    aria-hidden="true"
+                  >
+                    {state === 'checking' ? '…' : state === 'up' ? '✓' : '✕'}
+                  </span>
+                  <span className="health-check__name">{service.name}</span>
+                </button>
+                {isEditMode && (
+                  <button
+                    type="button"
+                    className="health-check__remove"
+                    onClick={() => handleRemoveService(service.url)}
+                    aria-label={`Stop monitoring ${service.name}`}
+                  >
+                    ×
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
       {isEditMode && (
         <form className="health-check__add-form" onSubmit={handleAddService}>
           <input

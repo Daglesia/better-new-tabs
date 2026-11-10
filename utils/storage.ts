@@ -10,6 +10,15 @@ export interface ServiceConfig {
   checkUrl?: string;
 }
 
+export interface GiteaConfig {
+  baseUrl: string;
+  token: string;
+}
+
+export const giteaConfigItem = storage.defineItem<GiteaConfig | null>('local:giteaConfig', {
+  fallback: null,
+});
+
 // Dashboard starts empty: no layouts, no widgets.
 export const layoutsItem = storage.defineItem<ResponsiveLayouts>('local:layouts', {
   fallback: {},

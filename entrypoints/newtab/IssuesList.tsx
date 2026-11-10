@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { fetchOpenIssues } from '@/utils/fetchIssues';
-import { formatIssues } from '@/utils/formatIssues';
+import { formatIssues, type FormattedIssue } from '@/utils/formatIssues';
+import { giteaConfigItem, type GiteaConfig } from '@/utils/storage';
 import '@daglesia/daglesias-library-of-components/scss';
 import Pagination from './Pagination';
+import GiteaConfigModal from './GiteaConfigModal';
 
-type Status = 'loading' | 'ready' | 'error';
+type Status = 'loading' | 'needs-config' | 'ready' | 'error';
 
 export default function IssuesList() {
+  const [config, setConfig] = useState<GiteaConfig | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [issues, setIssues] = useState<FormattedIssue[]>([]);
   const [itemsPerPage, setItemsPerPage] = useState(0);
   const [page, setPage] = useState(1);
@@ -17,9 +21,24 @@ export default function IssuesList() {
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
+    giteaConfigItem.getValue().then((saved) => {
+      if (saved) {
+        setConfig(saved);
+      } else {
+        setStatus('needs-config');
+      }
+    });
+  }, []);
+
+  // Fetch issues whenever the config changes
+  useEffect(() => {
+    if (!config) return;
     let cancelled = false;
 
-    fetchOpenIssues()
+    setStatus('loading');
+    setError(null);
+
+    fetchOpenIssues(config)
       .then((data) => {
         if (cancelled) return;
         setIssues(formatIssues(data));
@@ -34,7 +53,7 @@ export default function IssuesList() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [config]);
 
   // Reset back to page 1 whenever the underlying issue list changes.
   useEffect(() => {
@@ -85,19 +104,60 @@ export default function IssuesList() {
     }
   }, [itemsPerPage, issues, status]);
 
+  const handleSave = async (next: GiteaConfig) => {
+    await giteaConfigItem.setValue(next);
+    setConfig(next);
+    setModalOpen(false);
+  };
+
+  const modal = modalOpen ? (
+    <GiteaConfigModal
+      initial={config}
+      onSave={handleSave}
+      onCancel={() => setModalOpen(false)}
+    />
+  ) : null;
+
+  if (status === 'needs-config') {
+    return (
+      <div className="widget">
+        <div className="widget__header">
+          <span>To do list</span>
+        </div>
+        <p>Connect a Gitea instance to see your open issues.</p>
+        <button type="button" onClick={() => setModalOpen(true)}>
+          Connect Gitea
+        </button>
+        {modal}
+      </div>
+    );
+  }
+
   if (status === 'loading') {
-    return <div className="issues-list issues-list--loading">Loading issues…</div>;
+    return (
+      <div className="issues-list issues-list--loading">
+        Loading issues…
+        {modal}
+      </div>
+    );
   }
 
   if (status === 'error') {
-    return <div className="issues-list issues-list--error">Couldn't load issues: {error}</div>;
+    return (
+      <div className="widget issues-list--error">
+        <div className="widget__header">
+          <span>To do list</span>
+        </div>
+        <p>Couldn't load issues: {error}</p>
+        <button type="button" onClick={() => setModalOpen(true)}>
+          Edit connection
+        </button>
+        {modal}
+      </div>
+    );
   }
 
-  if (issues.length === 0) {
-    return <div className="issues-list issues-list--empty">No open issues 🎉</div>;
-  }
-
-  const effectivePerPage = itemsPerPage || issues.length;
+  const effectivePerPage = itemsPerPage || issues.length || 1;
   const totalPages = Math.max(1, Math.ceil(issues.length / effectivePerPage));
   const currentPage = Math.min(page, totalPages);
   const startIndex = (currentPage - 1) * effectivePerPage;
@@ -107,27 +167,43 @@ export default function IssuesList() {
     <div className="widget" ref={containerRef}>
       <div className="widget__header">
         <span>To do list</span>
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
-          />
-        )}
+        <div className="widget__header-actions">
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            />
+          )}
+          <button
+            type="button"
+            className="widget__icon-button"
+            onClick={() => setModalOpen(true)}
+            aria-label="Gitea connection settings"
+          >
+            ⚙
+          </button>
+        </div>
       </div>
-      <ul className="issues-list__items" ref={listRef}>
-        {visibleIssues.map((issue) => (
-          <li key={issue.id}>
-            <a className="dlc-list-item" href={issue.url} target="_blank" rel="noreferrer">
-              <div className="dlc-list-item__content">
-                <span className="dlc-list-item__content__title">{issue.title}</span>
-                <span className="dlc-list-item__content__subtitle">{issue.repoName}</span>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
+
+      {issues.length === 0 ? (
+        <div className="issues-list--empty">No open issues 🎉</div>
+      ) : (
+        <ul className="issues-list__items" ref={listRef}>
+          {visibleIssues.map((issue) => (
+            <li key={issue.id}>
+              <a className="dlc-list-item" href={issue.url} target="_blank" rel="noreferrer">
+                <div className="dlc-list-item__content">
+                  <span className="dlc-list-item__content__title">{issue.title}</span>
+                  <span className="dlc-list-item__content__subtitle">{issue.repoName}</span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {modal}
     </div>
   );
 }

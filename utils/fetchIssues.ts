@@ -1,3 +1,5 @@
+import type { GiteaConfig } from './storage';
+
 export interface GiteaUser {
   login: string;
   full_name?: string;
@@ -24,25 +26,15 @@ export interface GiteaIssue {
   updated_at: string;
 }
 
-const BASE_URL = import.meta.env.WXT_GITEA_BASE_URL ?? 'https://git.daglesia.com';
-const TOKEN = import.meta.env.WXT_GITEA_TOKEN ?? '';
-
-export async function fetchOpenIssues(): Promise<GiteaIssue[]> {
-  if (!TOKEN) {
-    throw new Error(
-      'Missing Gitea API token. Add WXT_GITEA_TOKEN to a .env file at the project root.',
-    );
-  }
-
+export async function fetchOpenIssues({ baseUrl, token }: GiteaConfig): Promise<GiteaIssue[]> {
   const response = await fetch(
-    `${BASE_URL}/api/v1/repos/issues/search?state=open&type=issues`,
-    {
-      headers: {
-        Authorization: `token ${TOKEN}`,
-      },
-    },
+    `${baseUrl}/api/v1/repos/issues/search?state=open&type=issues`,
+    { headers: { Authorization: `token ${token}` } },
   );
 
+  if (response.status === 401 || response.status === 403) {
+    throw new Error('Authentication failed. Check your access token.');
+  }
   if (!response.ok) {
     throw new Error(`Gitea API request failed: ${response.status} ${response.statusText}`);
   }
