@@ -1,8 +1,8 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
+  "name": "BeNT  (Better New Tabs)",
+  "description": "A personalized customizable tabs extension for everything and nothing at the same time.",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -15,7 +15,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
-    "@daglesia/daglesias-library-of-components": "link:@daglesia/daglesias-library-of-components",
+    "@daglesia/daglesias-library-of-components": "^1.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-grid-layout": "^2.2.4"
