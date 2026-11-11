@@ -4,6 +4,10 @@ const OPTIONAL_HOSTS = ['https://*/*', 'http://*/*'];
 
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
+  zip: {
+    downloadPackages: ['@daglesia/daglesias-library-of-components'],
+    excludeSources: ['bun.lock', '.npmrc'],
+  },
   manifest: ({ manifestVersion }) => ({
     name: 'BeNT (Better New Tabs)',
     description: 'A personalized customizable tabs extension for everything and nothing at the same time.',
