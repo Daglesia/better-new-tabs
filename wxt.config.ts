@@ -6,7 +6,7 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   zip: {
     downloadPackages: ['@daglesia/daglesias-library-of-components'],
-    excludeSources: ['bun.lock', '.npmrc'],
+    excludeSources: ['bun.lock', '.npmrc', '.env', '.env.*', '.clinerules/**', '.clineignore'],
   },
   manifest: ({ manifestVersion }) => ({
     name: 'BeNT (Better New Tabs)',
@@ -15,8 +15,10 @@ export default defineConfig({
     browser_specific_settings: {
       gecko: {
         id: 'better-new-tabs@daglesia.com',
+        strict_min_version: '140.0',
         data_collection_permissions: {
-          required: ['authenticationInfo'],
+          required: ['none'],
+          optional: ['authenticationInfo', 'locationInfo'],
         },
       },
     },
