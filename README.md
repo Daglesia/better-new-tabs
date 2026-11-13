@@ -51,21 +51,21 @@ These steps produce the exact extension package submitted to addons.mozilla.org.
 
 ### Build environment
 
-- **OS:** Ubuntu 24.04 / macOS / Windows 11 (any works) <!-- TODO: state the OS you built on -->
-- **Bun:** 1.x <!-- TODO: pin the exact version, e.g. 1.2.x -->
-- **Node.js:** 20 or newer (needed by some WXT tooling) <!-- TODO: confirm -->
+- **OS:** <OS and version, e.g. Ubuntu 24.04>
+- **Bun:** 1.3.14
+- **Node.js:** v24.15.0
 
 ### Steps
 
 ```bash
-# 1. Install dependencies from the committed bun.lock
-bun install --frozen-lockfile
+# 1. Install dependencies
+bun install
 
-# 2. Build the Firefox extension
+# 2. Build the Firefox extension (Manifest V2)
 bun run build:firefox
 ```
 
-The built extension is written to `.output/firefox-mv*/` (the folder name depends on the manifest version WXT selects). To produce the upload zip and the sources zip:
+The built extension is written to `.output/firefox-mv2/`. To produce the upload zip and the sources zip:
 
 ```bash
 bun run zip:firefox
@@ -75,21 +75,17 @@ The output in `.output/` contains `*-firefox.zip` (the extension) and `*-sources
 
 ### Private dependency
 
-One dependency, `@daglesia/daglesias-library-of-components`, is published to a private-scope registry configured in `.npmrc`:
-
-```
-@daglesia:registry=https://git.daglesia.com/api/packages/magdalena/npm/
-```
-
-<!-- TODO: pick ONE and delete the other before submitting:
-  (a) Public registry: "The package is public and installs without authentication."
-  (b) Bundled: "The sources zip includes the package tarball under vendor/; see package.json." -->
+`@daglesia/daglesias-library-of-components` is hosted on a private registry (see `.npmrc` in the repository). The sources zip bundles the package tarball, and its `package.json` points to the local copy, so no registry access or authentication is needed to build from the sources zip.
 
 The package provides only the SCSS stylesheet used by the To do list widget (`@daglesia/daglesias-library-of-components/scss`).
 
 ### Environment variables
 
 None are required for the build.
+
+### Linter notes
+
+`addons-linter` reports `UNSAFE_VAR_ASSIGNMENT` (`innerHTML`) warnings in the bundled chunk. They come from the bundled React DOM library. The extension's own source contains no `innerHTML` or `dangerouslySetInnerHTML` usage.
 
 ## Project structure
 
@@ -103,4 +99,4 @@ wxt.config.ts      Manifest and WXT configuration
 
 ## License
 
-<!-- TODO: add a LICENSE file and name it here, e.g. MIT -->
+MIT. See [LICENSE](LICENSE).

@@ -21,6 +21,9 @@ export default defineConfig({
           optional: ['authenticationInfo', 'locationInfo'],
         },
       },
+      gecko_android: {
+        strict_min_version: '142.0',
+      },
     },
     ...(manifestVersion === 2
       ? { optional_permissions: OPTIONAL_HOSTS }

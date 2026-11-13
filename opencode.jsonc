@@ -1,0 +1,57 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+  // Mirror .clineignore so ignored paths never trigger watcher work.
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      "build/**",
+      "dist/**",
+      ".wxt/**",
+      ".output/**",
+      "*.min.js",
+      "*.map",
+      "bun.lock",
+    ],
+  },
+  "permissions": [
+    // Base: everything allowed unless a later rule denies or asks.
+    { "action": "*", "resource": "*", "effect": "allow" },
+
+    // .clineignore — dependencies
+    { "action": "read", "resource": "node_modules/*", "effect": "deny" },
+    { "action": "read", "resource": "*/node_modules/*", "effect": "deny" },
+    { "action": "edit", "resource": "node_modules/*", "effect": "deny" },
+    { "action": "edit", "resource": "*/node_modules/*", "effect": "deny" },
+
+    // .clineignore — build outputs
+    { "action": "read", "resource": "build/*", "effect": "deny" },
+    { "action": "read", "resource": "dist/*", "effect": "deny" },
+    { "action": "read", "resource": ".wxt/*", "effect": "deny" },
+    { "action": "read", "resource": ".output/*", "effect": "deny" },
+    { "action": "edit", "resource": "build/*", "effect": "deny" },
+    { "action": "edit", "resource": "dist/*", "effect": "deny" },
+    { "action": "edit", "resource": ".wxt/*", "effect": "deny" },
+    { "action": "edit", "resource": ".output/*", "effect": "deny" },
+
+    // .clineignore — version control
+    { "action": "read", "resource": ".git/*", "effect": "deny" },
+    { "action": "edit", "resource": ".git/*", "effect": "deny" },
+
+    // .clineignore — environment/secrets
+    { "action": "read", "resource": ".env", "effect": "ask" },
+    { "action": "read", "resource": ".env.*", "effect": "ask" },
+    { "action": "read", "resource": ".env.example", "effect": "allow" },
+    { "action": "edit", "resource": ".env", "effect": "ask" },
+    { "action": "edit", "resource": ".env.*", "effect": "ask" },
+    { "action": "edit", "resource": ".env.example", "effect": "allow" },
+
+    // .clineignore — large/generated files
+    { "action": "read", "resource": "*.min.js", "effect": "deny" },
+    { "action": "read", "resource": "*.map", "effect": "deny" },
+    { "action": "read", "resource": "bun.lock", "effect": "deny" },
+    { "action": "edit", "resource": "*.min.js", "effect": "deny" },
+    { "action": "edit", "resource": "*.map", "effect": "deny" },
+    { "action": "edit", "resource": "bun.lock", "effect": "deny" },
+  ],
+}
