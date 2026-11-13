@@ -6,7 +6,17 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   zip: {
     downloadPackages: ['@daglesia/daglesias-library-of-components'],
-    excludeSources: ['bun.lock', '.npmrc', '.env', '.env.*', '.clinerules/**', '.clineignore'],
+    excludeSources: [
+      'bun.lock',
+      '.npmrc',
+      '.env',
+      '.env.*',
+      '.clinerules/**',
+      '.clineignore',
+      'AGENTS.md',
+      'opencode.jsonc',
+      'AMO-notes.md',
+    ],
   },
   manifest: ({ manifestVersion }) => ({
     name: 'BeNT (Better New Tabs)',

@@ -8,6 +8,17 @@ type Status = 'loading' | 'ready' | 'error';
 // Fallback if geolocation is denied/unavailable
 const DEFAULT_LOCATION = { latitude: 52.4064, longitude: 16.9252 };
 
+// `data_collection` isn't in the current browser types yet
+const LOCATION_PERM = { data_collection: ['locationInfo'] } as any;
+
+async function hasLocationPermission(): Promise<boolean> {
+  try {
+    return await browser.permissions.contains(LOCATION_PERM);
+  } catch {
+    return false;
+  }
+}
+
 function getPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -22,6 +33,7 @@ export default function WeatherWidget() {
   const [weather, setWeather] = useState<FormattedWeather | null>(null);
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [usingDefault, setUsingDefault] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,12 +41,19 @@ export default function WeatherWidget() {
     async function load() {
       let { latitude, longitude } = DEFAULT_LOCATION;
 
-      try {
-        const position = await getPosition();
-        latitude = position.coords.latitude;
-        longitude = position.coords.longitude;
-      } catch {
-        // silently fall back to default location
+      const granted = await hasLocationPermission();
+      if (cancelled) return;
+      setUsingDefault(!granted);
+
+      // Only touch geolocation once the data permission has been granted
+      if (granted) {
+        try {
+          const position = await getPosition();
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch {
+          // silently fall back to default location
+        }
       }
 
       try {
@@ -54,6 +73,11 @@ export default function WeatherWidget() {
       cancelled = true;
     };
   }, []);
+
+  // Must request directly in the click handler to keep the user gesture
+  const enableLocation = async () => {
+    if (await browser.permissions.request(LOCATION_PERM)) window.location.reload();
+  };
 
   if (status === 'loading') {
     return <div className="widget weather-widget weather-widget--loading">Loading weather…</div>;
@@ -80,6 +104,11 @@ export default function WeatherWidget() {
           ? `🌧️ Rain expected around ${weather.rain.time}`
           : '☀️ No rain expected today'}
       </div>
+      {usingDefault && (
+        <button type="button" onClick={enableLocation}>
+          Use my location
+        </button>
+      )}
     </div>
   );
 }

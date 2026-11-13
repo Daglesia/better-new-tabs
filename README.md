@@ -27,8 +27,8 @@ BeNT has no backend and no analytics. All settings are stored locally in the bro
 
 Network requests the extension makes:
 
-- **Gitea / Forgejo:** requests to the instance URL you configure, sending your access token in the `Authorization` header. The token is stored unencrypted in local extension storage, so use a token with read-only access to issues.
-- **Open-Meteo (`api.open-meteo.com`):** the Weather widget sends your coordinates to get a forecast. It asks the browser for your location and falls back to a default location (Poznań, Poland) if you deny or the lookup fails.
+- **Gitea / Forgejo:** requests to the instance URL you configure, sending your access token in the `Authorization` header. A token with read-only issue access (`read:issue`) is enough. The token is stored unencrypted in local extension storage, so don't use a broader one.
+- **Open-Meteo (`api.open-meteo.com`):** the Weather widget requests a forecast. By default it uses a fixed location (Poznań, Poland). Your own coordinates are sent only if you click "Use my location" and grant the optional location permission.
 - **Health check:** sends `HEAD` requests to the URLs you add. These use `no-cors`, so "up" means the server answered, not that it returned a healthy status.
 
 ## Development
@@ -51,7 +51,7 @@ These steps produce the exact extension package submitted to addons.mozilla.org.
 
 ### Build environment
 
-- **OS:** <OS and version, e.g. Ubuntu 24.04>
+- **OS:** Windows 11 Pro N, version 24H2
 - **Bun:** 1.3.14
 - **Node.js:** v24.15.0
 
@@ -78,6 +78,8 @@ The output in `.output/` contains `*-firefox.zip` (the extension) and `*-sources
 `@daglesia/daglesias-library-of-components` is hosted on a private registry (see `.npmrc` in the repository). The sources zip bundles the package tarball, and its `package.json` points to the local copy, so no registry access or authentication is needed to build from the sources zip.
 
 The package provides only the SCSS stylesheet used by the To do list widget (`@daglesia/daglesias-library-of-components/scss`).
+
+The sources zip does not include `bun.lock`, because it references the private registry. Direct dependencies are pinned to exact versions in `package.json` so the build resolves to the same versions as the submitted package.
 
 ### Environment variables
 

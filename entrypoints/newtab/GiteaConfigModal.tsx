@@ -43,7 +43,10 @@ export default function GiteaConfigModal({ initial, onSave, onCancel }: GiteaCon
 
     try {
       // Must be the first await so it still counts as a user gesture.
-      const granted = await browser.permissions.request({ origins: [`${parsed.origin}/*`] });
+      const granted = await browser.permissions.request({
+        origins: [`${parsed.origin}/*`],
+        data_collection: ['authenticationInfo'],
+      } as any);
       if (!granted) {
         setError(`Permission to access ${parsed.origin} was denied`);
         setSaving(false);
