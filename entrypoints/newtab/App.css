@@ -7,24 +7,6 @@ body,
   padding: 0;
 }
 
-.grid-viewport {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.grid-tile {
-  height: 100%;
-  overflow: auto;
-  background: #1a1a1a;
-  border-radius: 8px;
-}
-
-.issues-list {
-  width: 480px;
-  height: fit-content;
-}
-
 .issues-list__items {
   overflow: hidden;
   flex: 1;
@@ -501,6 +483,14 @@ body,
 .modal__field input:focus {
   outline: none;
   border-color: #646cff;
+}
+
+.modal__warning {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 152, 0, 0.12);
+  color: #ffb74d;
+  font-size: 0.85em;
 }
 
 .modal__error {

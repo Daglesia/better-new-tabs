@@ -9,7 +9,7 @@ Replace your new tab with a customizable grid of widgets: Gitea to-do list, serv
 BeNT (Better New Tabs) replaces the new tab page with a grid of widgets you can add, remove, drag and resize.
 
 Widgets:
-- To do list: open issues from your Gitea or Forgejo instance
+- To do list: open issues from Gitea or Forgejo repos you can access
 - Service Health: checks whether the URLs you add are reachable
 - Weather: current temperature and whether rain is expected today
 - Notepad: a scratchpad that saves automatically

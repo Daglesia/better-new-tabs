@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
+import { withDataCollection } from '@/utils/permissions';
 import type { GiteaConfig } from '@/utils/storage';
 
 interface GiteaConfigModalProps {
@@ -25,6 +26,8 @@ export default function GiteaConfigModal({ initial, onSave, onCancel }: GiteaCon
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const usesPlainHttp = normalizeBaseUrl(url)?.protocol === 'http:';
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -43,10 +46,9 @@ export default function GiteaConfigModal({ initial, onSave, onCancel }: GiteaCon
 
     try {
       // Must be the first await so it still counts as a user gesture.
-      const granted = await browser.permissions.request({
-        origins: [`${parsed.origin}/*`],
-        data_collection: ['authenticationInfo'],
-      } as any);
+      const granted = await browser.permissions.request(
+        withDataCollection({ origins: [`${parsed.origin}/*`] }, 'authenticationInfo'),
+      );
       if (!granted) {
         setError(`Permission to access ${parsed.origin} was denied`);
         setSaving(false);
@@ -85,6 +87,13 @@ export default function GiteaConfigModal({ initial, onSave, onCancel }: GiteaCon
             autoFocus
           />
         </label>
+
+        {usesPlainHttp && (
+          <div className="modal__warning" role="alert">
+            This URL uses http://, so your access token will be sent unencrypted. Use an https:// URL
+            unless you're connecting to a local instance.
+          </div>
+        )}
 
         <label className="modal__field">
           <span>Access token</span>

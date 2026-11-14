@@ -6,7 +6,7 @@ A customizable new tab page for Firefox and Chromium browsers. Replace the defau
 
 | Widget | What it does |
 | --- | --- |
-| **To do list** | Shows your open issues from a Gitea or Forgejo instance. |
+| **To do list** | Shows open issues from Gitea or Forgejo repos you can access. |
 | **Service Health** | Checks whether the URLs you add are reachable. |
 | **Weather** | Shows the current temperature and whether rain is expected today. |
 | **Notepad** | A scratchpad that saves automatically. |
@@ -27,7 +27,7 @@ BeNT has no backend and no analytics. All settings are stored locally in the bro
 
 Network requests the extension makes:
 
-- **Gitea / Forgejo:** requests to the instance URL you configure, sending your access token in the `Authorization` header. A token with read-only issue access (`read:issue`) is enough. The token is stored unencrypted in local extension storage, so don't use a broader one.
+- **Gitea / Forgejo:** requests to the instance URL you configure, sending your access token in the `Authorization` header. A token with read-only issue access (`read:issue`) is enough. Only the first page of results is fetched. The token is stored unencrypted in local extension storage, so don't use a broader one. Use an `https://` URL: if you enter an `http://` URL, the modal warns that the token will be sent unencrypted.
 - **Open-Meteo (`api.open-meteo.com`):** the Weather widget requests a forecast. By default it uses a fixed location (Poznań, Poland). Your own coordinates are sent only if you click "Use my location" and grant the optional location permission.
 - **Health check:** sends `HEAD` requests to the URLs you add. These use `no-cors`, so "up" means the server answered, not that it returned a healthy status.
 

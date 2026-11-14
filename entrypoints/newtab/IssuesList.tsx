@@ -124,7 +124,7 @@ export default function IssuesList() {
         <div className="widget__header">
           <span>To do list</span>
         </div>
-        <p>Connect a Gitea instance to see your open issues.</p>
+        <p>Connect a Gitea instance to see open issues from repos you can access.</p>
         <button type="button" onClick={() => setModalOpen(true)}>
           Connect Gitea
         </button>

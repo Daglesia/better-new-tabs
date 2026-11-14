@@ -31,6 +31,10 @@ export default defineConfig({
           optional: ['authenticationInfo', 'locationInfo'],
         },
       },
+      // Not an Android support claim: new tab overrides don't work on Firefox
+      // for Android. This only raises the Android compatibility floor to the
+      // version that understands gecko.data_collection_permissions (below it,
+      // addons-linter warns with KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION).
       gecko_android: {
         strict_min_version: '142.0',
       },

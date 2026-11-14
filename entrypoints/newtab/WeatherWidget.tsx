@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { fetchWeather } from '@/utils/fetchWeather';
 import { formatWeather } from '@/utils/formatWeather';
 import type { FormattedWeather } from '@/utils/formatWeather';
+import { withDataCollection } from '@/utils/permissions';
 
 type Status = 'loading' | 'ready' | 'error';
 
 // Fallback if geolocation is denied/unavailable
 const DEFAULT_LOCATION = { latitude: 52.4064, longitude: 16.9252 };
 
-// `data_collection` isn't in the current browser types yet
-const LOCATION_PERM = { data_collection: ['locationInfo'] } as any;
+// Firefox-only optional permission (Chromium ignores/doesn't support it)
+const LOCATION_PERM = withDataCollection({}, 'locationInfo');
 
 async function hasLocationPermission(): Promise<boolean> {
   try {
@@ -80,12 +81,12 @@ export default function WeatherWidget() {
   };
 
   if (status === 'loading') {
-    return <div className="widget weather-widget weather-widget--loading">Loading weather…</div>;
+    return <div className="widget">Loading weather…</div>;
   }
 
   if (status === 'error') {
     return (
-      <div className="widget weather-widget weather-widget--error">
+      <div className="widget">
         Couldn't load weather: {error}
       </div>
     );
@@ -94,12 +95,12 @@ export default function WeatherWidget() {
   if (!weather) return null;
 
   return (
-    <div className="widget weather-widget">
+    <div className="widget">
       <div className="widget__header">
         <span>Weather</span>
       </div>
-      <div className="weather-widget__temp">{weather.temperatureC}°C</div>
-      <div className="weather-widget__rain">
+      <div>{weather.temperatureC}°C</div>
+      <div>
         {weather.rain.willRain
           ? `🌧️ Rain expected around ${weather.rain.time}`
           : '☀️ No rain expected today'}
